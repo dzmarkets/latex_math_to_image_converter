@@ -1,0 +1,27 @@
+# Ignore the entire output_images directory
+output_images/
+
+# Ignore specific image files generated within output_images
+# This line is redundant if the whole directory is ignored, but kept for clarity
+# in case the ignore pattern for the directory changes.
+output_images/equation_*.png
+
+# Ignore LaTeX source files
+*.tex
+
+# Ignore Python bytecode files
+__pycache__/
+*.pyc
+
+# Ignore virtual environment folders
+venv/
+.venv/
+env/
+
+# Ignore editor-specific files (common examples)
+.vscode/
+.idea/
+
+# Ignore operating system generated files
+.DS_Store
+Thumbs.db
