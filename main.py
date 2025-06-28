@@ -3,7 +3,7 @@
 #              now with an option to process equations directly from a .tex file
 #              and replace them with images in a new .tex file.
 # Developed by: M. YOUCEF Yazid (yazid.youcef@gmail.com)
-# File Version: 2.3.0
+# File Version: 2.4.0
 # CreateDate: 2025-06-27
 # UpdateDate: 2025-06-27
 
@@ -60,11 +60,8 @@ def latex_to_image(latex_equation: str, output_filename: str = 'output_equation.
 
     except Exception as e:
         # Catch any exceptions that occur during the process and print an informative error message.
-        print(f"An error occurred during image generation for '{latex_equation}': {e}")
-        print("Please ensure your LaTeX equation is correctly formatted and enclosed in '$...$' or '$$...$$'.")
-        print("Also, verify that a LaTeX distribution (like MiKTeX) is installed and in your system's PATH.")
         # Re-raise the exception or return a status to indicate failure if crucial for replacement logic
-        raise # Re-raise to be caught by calling function for replacement logic
+        raise Exception(f"Image generation failed: {e}") # Re-raise with a more generic message for logging
 
 
 def extract_equations_with_spans(file_path: str) -> list[tuple[int, int, str, bool]]:
@@ -225,11 +222,12 @@ if __name__ == "__main__":
                 print(f"Error reading original LaTeX file: {e}")
                 continue
 
-            # Initialize counters for the summary report
+            # Initialize counters and error log list
             total_equations_found = len(equations_data)
             successfully_processed_images = 0
             errors_encountered_images = 0
             replacements_made = 0 
+            error_log_entries = [] # List to store details of failed equations
 
             # Get the base name of the LaTeX file (e.g., 'my_document' from 'my_document.tex')
             tex_file_base_name = os.path.splitext(os.path.basename(file_path))[0]
@@ -267,7 +265,14 @@ if __name__ == "__main__":
 
                 except Exception as e:
                     errors_encountered_images += 1
-                    print(f"Skipping image generation for '{original_equation_str}' due to error: {e}")
+                    error_details = (
+                        f"Equation Number: {i+1}\n"
+                        f"Original LaTeX: {original_equation_str}\n"
+                        f"Error: {e}\n"
+                        "----------------------------------------\n"
+                    )
+                    error_log_entries.append(error_details)
+                    print(f"Skipping image generation for equation {i+1} due to error. Details logged.")
             
             if sub_mode == 'r':
                 # Apply replacements in reverse order to avoid index shifts
@@ -294,8 +299,7 @@ if __name__ == "__main__":
 
                 final_content = add_graphicx_package(final_content) # Ensure graphicx package is included in the new file
 
-                original_base_name = os.path.splitext(os.path.basename(file_path))[0]
-                output_tex_filename = os.path.join(output_dir, f"{original_base_name}_with_images.tex")
+                output_tex_filename = os.path.join(output_dir, f"{tex_file_base_name}_with_images.tex")
 
                 try:
                     with open(output_tex_filename, 'w', encoding='utf-8') as f:
@@ -311,6 +315,18 @@ if __name__ == "__main__":
             else:
                 print(f"\nFinished converting equations to images from '{file_path}'. Images saved in '{output_dir}'.")
             
+            # Write error log if any errors occurred
+            if error_log_entries:
+                error_log_filename = os.path.join(output_dir, "image_generation_errors.log")
+                try:
+                    with open(error_log_filename, 'w', encoding='utf-8') as log_file:
+                        log_file.write(f"--- Image Generation Errors for {file_path} ---\n\n")
+                        for entry in error_log_entries:
+                            log_file.write(entry)
+                    print(f"\nAn error log for ungenerated images has been created: {error_log_filename}")
+                except Exception as e:
+                    print(f"Error writing error log file: {e}")
+
             # Summary report for file processing
             print("\n--- File Processing Summary ---")
             print(f"Total equations found: {total_equations_found}")

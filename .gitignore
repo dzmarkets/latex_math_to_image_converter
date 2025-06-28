@@ -6,6 +6,9 @@ output_images/
 # in case the ignore pattern for the directory changes.
 output_images/equation_*.png
 
+# Ignore generated error log files
+output_images/image_generation_errors.log
+
 # Ignore LaTeX source files
 *.tex
 
