@@ -3,7 +3,7 @@
 #              now with an option to process equations directly from a .tex file
 #              and replace them with images in a new .tex file.
 # Developed by: M. YOUCEF Yazid (yazid.youcef@gmail.com)
-# File Version: 2.1.0
+# File Version: 2.2.0
 # CreateDate: 2025-06-27
 # UpdateDate: 2025-06-27
 
@@ -228,13 +228,16 @@ if __name__ == "__main__":
             # This variable must be initialized before the loop
             replacements_made = 0 
 
+            # Get the base name of the LaTeX file (e.g., 'my_document' from 'my_document.tex')
+            tex_file_base_name = os.path.splitext(os.path.basename(file_path))[0]
+
             # Keep track of replacements in reverse order of character index
             replacements_for_content = [] 
 
             # First, process equations and gather replacement details
             for i, (start_idx, end_idx, original_equation_str, is_display_math) in enumerate(equations_data): # Iterate in natural order for image generation
-                # Number images from 1 to N based on original content order
-                image_filename = f"equation_{i+1}.png" 
+                # New naming convention: include original .tex file name
+                image_filename = f"{tex_file_base_name}_equation_{i+1}.png" 
                 output_image_path = os.path.join(output_dir, image_filename)
                 
                 try:
