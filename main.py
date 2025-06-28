@@ -3,7 +3,7 @@
 #              now with an option to process equations directly from a .tex file
 #              and replace them with images in a new .tex file.
 # Developed by: M. YOUCEF Yazid (yazid.youcef@gmail.com)
-# File Version: 2.2.0
+# File Version: 2.3.0
 # CreateDate: 2025-06-27
 # UpdateDate: 2025-06-27
 
@@ -225,7 +225,10 @@ if __name__ == "__main__":
                 print(f"Error reading original LaTeX file: {e}")
                 continue
 
-            # This variable must be initialized before the loop
+            # Initialize counters for the summary report
+            total_equations_found = len(equations_data)
+            successfully_processed_images = 0
+            errors_encountered_images = 0
             replacements_made = 0 
 
             # Get the base name of the LaTeX file (e.g., 'my_document' from 'my_document.tex')
@@ -243,6 +246,7 @@ if __name__ == "__main__":
                 try:
                     # The equation string passed to latex_to_image must include the delimiters
                     latex_to_image(original_equation_str, output_image_path, dpi)
+                    successfully_processed_images += 1
                     
                     if sub_mode == 'r':
                         # Construct \includegraphics command.
@@ -262,6 +266,7 @@ if __name__ == "__main__":
                         replacements_for_content.append((start_idx, end_idx, replacement_text))
 
                 except Exception as e:
+                    errors_encountered_images += 1
                     print(f"Skipping image generation for '{original_equation_str}' due to error: {e}")
             
             if sub_mode == 'r':
@@ -305,6 +310,17 @@ if __name__ == "__main__":
                     print(f"Error writing new LaTeX file: {e}")
             else:
                 print(f"\nFinished converting equations to images from '{file_path}'. Images saved in '{output_dir}'.")
+            
+            # Summary report for file processing
+            print("\n--- File Processing Summary ---")
+            print(f"Total equations found: {total_equations_found}")
+            print(f"Successfully converted images: {successfully_processed_images}")
+            print(f"Errors encountered (images NOT generated): {errors_encountered_images}")
+            if sub_mode == 'r':
+                print(f"Equations replaced in new .tex file: {replacements_made}")
+            print("---------------------------------")
+
+
         else:
             print("Invalid choice. Please enter 'm', 'f', or 'e'.")
 
